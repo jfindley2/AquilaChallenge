@@ -1,0 +1,124 @@
+<html>
+ <head>
+    <!--<script async defer type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false&v=3&libraries=geometry&key=AIzaSyCsANC8D3v8EhL301tuk4WNfH1_O5sxpF0&callback=map"></script>-->
+    <!--<script async defer-->
+    <!--   src="https://maps.google.com/maps/api/js?sensor=false&v=3&libraries=geometry&key=AIzaSyCsANC8D3v8EhL301tuk4WNfH1_O5sxpF0&callback=mapper">-->
+    <!--</script>-->
+    <style>
+      #map {
+        height: 500px;
+        width: 50%;
+        background-color: grey;
+      }
+    </style>
+ </head>
+ <body>
+    <div id="map"></div>
+    <button onclick="assignStart()">Origin</button>
+    <button onclick="assignEnd()">Destination</button>
+    <button onclick="travelTime()">Travel Time</button>
+    <button onclick="determineDistance()">Distance</button>
+
+    <script>
+
+        var switcher = 2;
+        var start;
+        var end;
+        var dur;
+        var dist;
+        
+        function map() {
+            //var latlng = new google.maps.LatLng(40.4464, -74.3788);
+            var startLocation = new google.maps.LatLng(0, 0);
+            var endLocation = new google.maps.LatLng(0, 0);
+            var slat = startLocation.lat();
+            var slng = startLocation.lng();
+            var elat = endLocation.lat();
+            var elng = endLocation.lng();
+
+            var duration;
+            var distance;
+            var service = new google.maps.DistanceMatrixService();
+
+            var defaultLocation = {lat: 35.08, lng: -106.65};
+            
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 2,
+                center: defaultLocation
+            });
+            
+            map.addListener('click', function(event) {
+                if (switcher === 0)
+                {
+                    startLocation = event.latLng;
+                    start = startLocation;
+                    slat = startLocation.lat();
+                    slng = startLocation.lng();
+                }
+                else if (switcher == 1){
+                    endLocation = event.latLng;
+                    end = endLocation;
+                    elat = endLocation.lat();
+                    elng = endLocation.lng();
+                }
+                else {
+                    alert("Please verify whether you are choosing an origin or a destination.");
+                }
+                service.getDistanceMatrix(
+                {
+                    origins: [{lat: slat, lng: slng}],
+                    destinations: [{lat: elat, lng: elng}],
+                  travelMode: 'DRIVING',
+                  unitSystem: google.maps.UnitSystem.METRIC,
+                  avoidHighways: false,
+                  avoidTolls: false
+                }, function(response, status){
+                  if (status != 'OK') {
+                    alert("Error was: " + status);
+                  } else {
+                      var origins = response.originAddresses;
+                      var destinations = response.destinationAddresses;
+                      //var distance = response.rows[0].results[0].distance.text;
+                      var results = response.rows[0].elements;
+    
+                      duration = results[0].duration;
+                      dur = duration;
+                      distance = results[0].distance;
+                      dist = distance;
+                      
+                  }
+                });
+            });
+
+        }
+        function determineDistance() {
+                //alert(google.maps.geometry.spherical.computeDistanceBetween (startLocation, endLocation));
+                if (dist !== undefined){
+                    alert("Distance between two locations: " + dist.text);
+                } else {
+                    alert("Unable to determine distance between locations.");
+                }
+        }
+
+        function assignStart(){
+            switcher = 0;
+        }
+        function assignEnd() {
+            switcher = 1;
+        }
+        function travelTime() {
+            if (dur !== undefined){
+                alert("Travel time between two locations: " + dur.text);
+            } else {
+                alert("Unable to create route between locations.");
+            }
+        }
+
+    </script>
+    
+    <script async defer
+       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCsANC8D3v8EhL301tuk4WNfH1_O5sxpF0&callback=map">
+    </script>
+    
+ </body>
+</html>
